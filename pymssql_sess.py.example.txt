@@ -3,5 +3,10 @@ from sql_config import config
 
 # Fill the tuple with information about your SQL server
 conn = pymssql.connect(
-    * your connection information here *
+   server='',
+   user='',
+   password='',
+   database='',
+   as_dict=True,
+   port=''
 )  
