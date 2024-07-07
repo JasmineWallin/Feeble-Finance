@@ -1,5 +1,4 @@
 import pymssql
-from sql_config import config
 
 # Fill the tuple with information about your SQL server
 conn = pymssql.connect(
