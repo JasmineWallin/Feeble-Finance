@@ -17,12 +17,13 @@ class AnotherWindow(QWidget):
         layout = QVBoxLayout()
         self.setGeometry(100, 100, 300, 400)
 
-        # creating a group box
+        ### creating a group box
         self.formGroupBox = QGroupBox("Add New Financial Item")
 
         # creating spin box to select cost of item
         self.cost = QDoubleSpinBox()
         self.cost.setMaximum(99999.99)
+        
         # spin box for start date , month , year
         self.startmonth = QSpinBox()
         self.startmonth.setMaximum(12)
@@ -36,6 +37,7 @@ class AnotherWindow(QWidget):
         self.startLayout.addWidget(self.startday)
         self.startLayout.addWidget(QLabel("/"))
         self.startLayout.addWidget(self.startyear)
+        
         # spin box for end date , month , year
         self.endmonth = QSpinBox()
         self.endmonth.setMaximum(12)
@@ -49,19 +51,22 @@ class AnotherWindow(QWidget):
         self.endLayout.addWidget(self.endday)
         self.endLayout.addWidget(QLabel("/"))
         self.endLayout.addWidget(self.endyear)
+        
         # creating combo box for if its a current item
         self.curritem = QComboBox()
         self.curritem.addItems(['yes', 'no'])
+        
         # creating combo box to select use type
         self.useComboBox = QComboBox()
         self.useComboBox.addItems(['needs', 'fufillment', 'social', 'extra'])
+        
         # creating a line edit for name of item
         self.item = QLineEdit()
 
-        # calling the method that create the form
+        ### calling the method that create the form
         self.createForm()
 
-        # "Ok" button
+        ### "Ok" button
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok)
         self.buttonBox.accepted.connect(self.input)
 
@@ -70,10 +75,10 @@ class AnotherWindow(QWidget):
         # adding button box to the layout
         layout.addWidget(self.buttonBox)
  
-        # setting lay out
+        ### setting lay out
         self.setLayout(layout) 
  
-    # get info method called when form is accepted
+    # checking if input is valid, inputting data into MS SQL server
     def input(self):
         # if all inputted values in the form are valid
         if (self.item.text() != '') and (float(self.cost.text()) != 0) and ((self.curritem.currentText() == 'yes' and self.startmonth.text() != '0' and self.startday.text() != '0') or (self.curritem.currentText() == 'no' and self.startmonth.text() != '0' and self.startday.text() != '0' and self.endmonth.text() != '0' and self.endday.text() != '0')):
