@@ -81,7 +81,7 @@ class AnotherWindow(QWidget):
     # checking if input is valid, inputting data into MS SQL server
     def input(self):
         # if all inputted values in the form are valid
-        if (self.item.text() != '') and (float(self.cost.text()) != 0) and ((self.curritem.currentText() == 'yes' and self.startmonth.text() != '0' and self.startday.text() != '0') or (self.curritem.currentText() == 'no' and self.startmonth.text() != '0' and self.startday.text() != '0' and self.endmonth.text() != '0' and self.endday.text() != '0')):
+        if (self.item.text() != '') and (self.cost.text() != '0') and (self.cost.text() != '0.00') and (self.cost.text() != '0.0') and (self.cost.text() != '') and ((self.curritem.currentText() == 'yes' and self.startmonth.text() != '0' and self.startday.text() != '0') or (self.curritem.currentText() == 'no' and self.startmonth.text() != '0' and self.startday.text() != '0' and self.endmonth.text() != '0' and self.endday.text() != '0')):
             out = query_data.input_query(self.item.text(), self.cost.text(), self.startmonth.text() + "/" + self.startday.text() + "/" + self.startyear.currentText(), self.endmonth.text() + "/" + self.endday.text() + "/" + self.endyear.currentText(), self.useComboBox.currentText(), self.curritem.currentText())
             # output an error messagebox if failed
             if out == 0:

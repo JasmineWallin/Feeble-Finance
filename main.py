@@ -13,7 +13,7 @@
 import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QPalette, QColor
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas # TODO maybe only neeed these in query_data.py
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas 
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
 import openpyxl
@@ -30,6 +30,11 @@ class Window(QWidget):
         super(Window, self).__init__(parent=parent)
         self.figure = plt.figure() # plot
         self.canvas = FigureCanvas(self.figure)
+        self.figure2 = plt.figure()
+        self.canvas2 = FigureCanvas(self.figure2)
+        self.figure3 = plt.figure()
+        self.canvas3 = FigureCanvas(self.figure3)
+        self.high_expenses = QLabel()
         self.table_widget = QTableWidget()
         self.layoutUI()
     
@@ -53,7 +58,7 @@ class Window(QWidget):
         tab2_items = QWidget()
         tab2_items.layout = QVBoxLayout(tab2_items)
         Button_01 = QPushButton("Refresh Data")
-        Button_01.clicked.connect(self.plot)
+        Button_01.clicked.connect(self.refresh)
         tab2_items.layout.addWidget(Button_01)
         tab2_items.setLayout(tab2_items.layout)
 
@@ -69,15 +74,24 @@ class Window(QWidget):
         graph_text = QLabel() 
         graph_text.setText("Graph of Expenses") 
         chart_text = QLabel() 
-        chart_text.setText("Chart of Expense Breakdown")   
-        self.toolbar = NavigationToolbar(self.canvas, tab2_items) # toolbar
+        chart_text.setText("Charts of Expenses")   
+
+        # frames for canvasses
+        frame = QFrame()
+        lay = QVBoxLayout(frame)
+        lay.addWidget(self.canvas)
+        frame2 = QFrame()
+        lay2 = QHBoxLayout(frame2)
+        lay2.addWidget(self.canvas2)
+        lay2.addWidget(self.canvas3)
 
         # Adding items to the screen through a vertical layout
         scrollLayout.addWidget(graph_text)
-        scrollLayout.addWidget(self.toolbar)
-        scrollLayout.addWidget(self.canvas)
+        scrollLayout.addWidget(frame)
         scrollLayout.addWidget(chart_text)
-
+        scrollLayout.addWidget(frame2) 
+        scrollLayout.addWidget(self.high_expenses)
+        
         scroll.setWidget(scrollContent)
         
         return tab2_items
@@ -124,23 +138,69 @@ class Window(QWidget):
         self.principle_layout.addWidget(self.tabs) 
         self.setLayout(self.principle_layout)
 
+    # refresh plot and chart
+    def refresh(self):
+        # refreshing the plot for expense over time
+        self.plot()
+        # refreshing the monthly chart expense visuals
+        self.chart()
+        # refreshing the highest expenses text
+        top1, top2, top3 = query_data.find_top_three()
+        highstring = "Your Current Highest Expenses:\n*" + top1 + "\n*" + top2 + "\n*" + top3
+        self.high_expenses.setText(highstring)
+
     # Financial graph for tab 3 
     def plot(self):
-        # TODO THIS IS NEXT!
         self.figure.clear()
         ax = self.figure.add_subplot(111) # create an axis
 
-        # plot data
-        data = query_data.graph_data()
-        ax.plot(data, '*-')
+        # adding labels
+        ax.set_ylabel('Amount Per Month')
+        ax.set_xlabel('Date')
+        ax.set_title('Expense Breakdown Over Time')
+
+        ### plot data lines ###
+        # general data
+        general_data = query_data.graph_data('')
+        # needs data
+        needs_data = query_data.graph_data('needs')
+        # fufillment data
+        fuf_data = query_data.graph_data('fufillment')
+        # social data
+        soc_data = query_data.graph_data('social')
+        # extra data
+        extra_data = query_data.graph_data('extra')
+        # plot everything
+        ax.plot(general_data[0], general_data[1], needs_data[0], needs_data[1], fuf_data[0], fuf_data[1],soc_data[0], soc_data[1],extra_data[0], extra_data[1],'b-') 
+        #ax.plot(general_data[0], general_data[1], '-b')  
+        ax.legend(('total', 'needs', 'fufillment', 'social', 'extra'))
   
         # refresh canvas
         self.canvas.draw()
 
-    # Chart for tab 3
+    # Charts for tab 3
     def chart(self):
-        # TODO THIS IS NEXT!
-        pass
+
+        # getting the chart data for both graphs
+        chart_data = query_data.chart_data()
+
+        ### chartT 1 ###
+        self.figure2.clear()
+        ax = self.figure2.add_subplot(111)
+        ax.set_title('Current Monthly Expense Breakdown')
+        ax.pie(chart_data, labels=['needs', 'fufillment', 'social', 'extra'])
+
+        ### chart 2 ###
+        self.figure3.clear()
+        ax2 = self.figure3.add_subplot(111)
+        ax2.set_title('Detailed Current Monthly Expense Breakdown')
+        ax2.set_xlabel("Type of Expense")
+        ax2.set_ylabel("Amount Spent Monthly")
+        ax2.bar(['needs', 'fufillment', 'social', 'extra'], chart_data)
+        
+        # plotting / drawing charts
+        self.canvas2.draw()
+        self.canvas3.draw()
     
     # finds input from a form to add to data
     def add_form(self):
@@ -188,7 +248,7 @@ if __name__ == '__main__':
     # creating a window object
     main = Window()
     main.setWindowTitle("Feeble Finance")
-    main.setGeometry(200, 200, 800, 600)
+    main.setGeometry(200, 200, 1200, 700)
 
     # showing the window
     main.show()
