@@ -8,10 +8,21 @@
 # database if correct format #
 ##############################
 
+###IMPORTS###
 import query_data
 from PyQt5.QtWidgets import *
 
+
 class AnotherWindow(QWidget):
+    ''' 'Add More Data' GUI for Feeble Finance. Window showing an input form, 
+    and submission button to allow user to add more financial data to the MS SQL database. 
+
+    Methods:
+
+    self.input - checks if user input is valid from the form, and either outputs an error 
+                    QMessageBox or queries data to server.
+    self.createForm - connects all of the PyQt5 UI elements together to create the form. 
+    '''
     def __init__(self):
         super().__init__()
         layout = QVBoxLayout()

@@ -10,9 +10,10 @@
 # server.                   #
 #############################
 
+###IMPORTS###
 import sys
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QPalette, QColor
+from PyQt5.QtGui import QFont
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas 
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
@@ -20,10 +21,30 @@ import openpyxl
 import query_data
 from add_new import AnotherWindow
 
-from itertools import product
 
 # main window
 class Window(QWidget):
+    ''' Main GUI Window for Feeble Finance. Includes GUI methods as well as 
+    matplotlib.pyplot methods to show data derived from query_data functions.
+
+    Methods:
+
+    self.tab1 - The PyQt5 UI elements for title and description page.
+    self.tab2 - The PyQt5 UI elements and three matplotlib.pyplot canvases for 
+                the graphs and charts page.
+    self.tab3 - The PyQt5 UI elements for the personal data page.
+    self.layoutUI - The UI that connects the three tabs together and creates the 
+                    main interface.
+    self.refresh - Calls self.plot, self.chart, and query_data.get_top_three() to 
+                    refresh UI based on current financial data.
+    self.plot - Creates a financial line graph for tab 2. 
+    self.chart - Creates the pie and bar graphs for tab 2. 
+    self.add_form - Functionality for the 'Add More Data' button on tab 3. Calls 
+                        AnotherWindow() class from add_new.py.
+    self.excel_sheet - Creates the excel sheet displaying financial data for tab 3. 
+    self.closeEvent - Calls query_data.finish() upon closing the GUI so that the 
+                        MS SQL connection is stopped. 
+    '''
       
     # constructor
     def __init__(self, parent=None):
@@ -44,10 +65,14 @@ class Window(QWidget):
         tab1_items = QWidget()
         tab1_items.layout = QVBoxLayout(tab1_items) 
         l = QLabel() 
-        l.setText("Feeble Finance\nTrack your finances.") 
+        l.setText("Feeble Finance") 
+        l.setFont(QFont('Arial', 30))
+        l1 = QLabel()
+        l1.setText("Track and visualize your monthly finances.\n\nTry adding some monthly finances in 'My Data', and click 'Refresh Data' button in 'Graphs and Charts'!\n\n\n\n\n\n\n@Jasmine Wallin 2024")
         
         # adding items onto the layout
         tab1_items.layout.addWidget(l) 
+        tab1_items.layout.addWidget(l1)
         tab1_items.setLayout(tab1_items.layout) 
 
         return tab1_items
@@ -171,9 +196,9 @@ class Window(QWidget):
         # extra data
         extra_data = query_data.graph_data('extra')
         # plot everything
-        ax.plot(general_data[0], general_data[1], needs_data[0], needs_data[1], fuf_data[0], fuf_data[1],soc_data[0], soc_data[1],extra_data[0], extra_data[1],'b-') 
-        #ax.plot(general_data[0], general_data[1], '-b')  
-        ax.legend(('total', 'needs', 'fufillment', 'social', 'extra'))
+        if general_data != ([], []): # if there is data to display yet
+            ax.plot(general_data[0], general_data[1], needs_data[0], needs_data[1], fuf_data[0], fuf_data[1],soc_data[0], soc_data[1],extra_data[0], extra_data[1],'b-') 
+            ax.legend(('total', 'needs', 'fufillment', 'social', 'extra'))
   
         # refresh canvas
         self.canvas.draw()
@@ -182,22 +207,26 @@ class Window(QWidget):
     def chart(self):
 
         # getting the chart data for both graphs
+        new = False
         chart_data = query_data.chart_data()
+        if chart_data == [0.0, 0.0, 0.0, 0.0]: # if there is no data yet
+            new = True
 
-        ### chartT 1 ###
+        ### chart 1 ###
         self.figure2.clear()
         ax = self.figure2.add_subplot(111)
         ax.set_title('Current Monthly Expense Breakdown')
-        ax.pie(chart_data, labels=['needs', 'fufillment', 'social', 'extra'])
+        if not new:
+            ax.pie(chart_data, labels=['needs', 'fufillment', 'social', 'extra'])
 
         ### chart 2 ###
         self.figure3.clear()
         ax2 = self.figure3.add_subplot(111)
-        ax2.set_title('Detailed Current Monthly Expense Breakdown')
+        ax2.set_title('Current Monthly Expense Breakdown')
         ax2.set_xlabel("Type of Expense")
         ax2.set_ylabel("Amount Spent Monthly")
-        ax2.bar(['needs', 'fufillment', 'social', 'extra'], chart_data)
-        
+        if not new:
+            ax2.bar(['needs', 'fufillment', 'social', 'extra'], chart_data)
         # plotting / drawing charts
         self.canvas2.draw()
         self.canvas3.draw()
@@ -248,7 +277,7 @@ if __name__ == '__main__':
     # creating a window object
     main = Window()
     main.setWindowTitle("Feeble Finance")
-    main.setGeometry(200, 200, 1200, 700)
+    main.setGeometry(200, 200, 1200, 760)
 
     # showing the window
     main.show()

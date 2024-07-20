@@ -17,7 +17,6 @@ Installations Needed: python3, pyqt5, pyqt5-tools, pymssql, matplotlib, openpyxl
     - 'refresh data' buttons on tab 2 and tab 3 will need to be pressed whenever new data is added, or upon starting the program.
     - to add new data to the database, navigate to tab 3 and click the 'Add More Data' button.
 
-In Production.
 
 
 *July 2024 @Jasmine Wallin.*

@@ -13,8 +13,10 @@ from pymssql_sess import conn
 import xlsxwriter
 from datetime import datetime, date
 
+
 # check if the SQL dtabase exists and if it does create it
 def create_database():
+
     SQL_QUERY = """
     SELECT * FROM finance_table
     """
@@ -24,9 +26,8 @@ def create_database():
     # if finance_table exists
     try:
         cursor.execute(SQL_QUERY)
-    # if finance_table doesnt exist 
+    # if finance_table doesnt exist - make database
     except:
-        print("making a new database")
         sql ='''CREATE TABLE finance_table(
         item TEXT,
         monthly_expense TEXT,
@@ -40,9 +41,17 @@ def create_database():
     # closing everything
     cursor.close()
 
-# get data for graph from queried data
+# get data for graph from MS SQL queried data
 def graph_data(type):
-    # TODO header
+    '''
+    Output : (x_coords, y_coords)
+
+        - x_coords : list - a list of strings that represent the x coordinates 
+                    (dates in MM/DD/YYYY format) of a graph.
+        - y_coords : list - a list the same length as x_coords, of integers that 
+                    represent the y coordinates (amount of cumulative money 
+                    spent on dates) of a graph.
+    '''
     x_coords = []
     y_coords = []
 
@@ -65,6 +74,7 @@ def graph_data(type):
         for r in all: 
             # checking for correct type of line graph, if not general
             if (type == 'needs' and r['type'] != 'needs') or (type == 'fufillment' and r['type'] != 'fufillment') or (type == 'social' and r['type'] != 'social') or (type == 'extra' and r['type'] != 'extra'):
+                # adding a dictionary definition so that outputs are all the same length
                 if r['start_date'] not in lst:
                     lst[r['start_date']] = 0   
                 if r['curr'] != 'yes':
@@ -72,6 +82,7 @@ def graph_data(type):
                         lst[r['end_date']] = 0
                 continue
             
+            # adding to the coordinates if the right type
             if r['start_date'] not in lst:
                 lst[r['start_date']] = float(r['monthly_expense'])
             else:
@@ -106,8 +117,18 @@ def graph_data(type):
 
 # get monthly expense data for chart from queried data
 def chart_data():
-    # TODO header
+    '''
+    Output : [needs, fufillment, social, extra]
 
+        - needs : float - the float representation of the amount of money spent 
+                this month for items of 'needs' type.
+        - fufillment : float - the float representation of the amount of money
+                        spent this month for items of 'fufillment' type.
+        - social : float - the float representation of the amount of money spent
+                    this month for items of the 'social' type.
+        - extra : float - the float representation of the amount of money spent 
+                this month for items of the 'extra' type.
+    '''
     needs = 0.0
     fufillment = 0.0
     social = 0.0
@@ -148,9 +169,14 @@ def chart_data():
     # returning the ['needs', 'fufillment', 'social', 'extra'] item costs for this month
     return [needs, fufillment, social, extra]
 
-# find the top three largest monthly charges from data
+# find the top three largest monthly charges from MS SQL data
 def find_top_three():
-    # TODO write header
+    '''
+    Output : [str, str, str]
+        - All the same:
+            str - '*item name* - $*item price*', of one of the top three monthly expenses.
+        - Left as '' if there are not enough items in MS SQL database.
+    '''
     ret = ['', '', '']
 
     SQL_QUERY = """
@@ -195,12 +221,11 @@ def find_top_three():
 # make excel file from queried data 
 def make_excel():
     ''' 
-    input: none
-    output: finance_data.xlsx filled with data from sql database, 
+    Output : finance_data.xlsx filled with data from sql database, 
             with column headers: item, monthly expense, start date, end date, type, curr
-            - all columns are string/chars type
+            - all columns are TEXT type
     '''
-    print('making excel...')
+    
     SQL_QUERY = """
     SELECT * FROM finance_table
     """
@@ -249,14 +274,15 @@ def make_excel():
 # input data into the SQL server 
 def input_query(item, monthlyexp, start, end, type, curr): 
     '''
-    inputs: 
+    Input: 
         item - string : the name of the financial expense
         monthlyexp - string : the integer only string that represents the monthly cost
         start - char[10] : date in format MM/DD/YYYY that represents when expense started
         end - char[10] : date in format MM/DD/YYYY that represents when expense ended (if '' then its current)
         type - string : either 'needs', 'fufillment', 'social', or 'extra'
         curr - string : 'yes' or 'no' if its a current item
-    output:
+    
+    Output:
         return_out - int : 0/1 based on if input_query was successful
     '''
     return_out = 1
@@ -283,7 +309,6 @@ def input_query(item, monthlyexp, start, end, type, curr):
 
 # delete something from SQL server
 def delete_query_item():
-    #TODO
     pass
 
 # close SQL query connection
